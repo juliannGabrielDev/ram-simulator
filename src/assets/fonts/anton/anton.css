@@ -1,0 +1,9 @@
+/* anton */
+@font-face {
+	font-family: "Anton";
+	font-style: normal;
+	font-weight: 400;
+	font-stretch: 100%;
+	src: local("Anton Regular"), local("Anton-Regular"), url(anton.woff2) format("woff2");
+}
+

@@ -1,25 +1,33 @@
 <script setup lang="ts">
+// Importa los tipos y componentes necesarios.
 import type { Process } from '../types';
+import Button from './Button.vue';
 
+// Define las propiedades que el componente espera recibir.
 defineProps<{
   installedApps: Process[];
   loadedApps: Process[];
 }>();
 
+// Define los eventos que el componente puede emitir.
 const emit = defineEmits(['load-app', 'unload-app']);
 
+// Emite el evento 'load-app' para cargar una aplicación.
 const loadApp = (app: Process) => {
   emit('load-app', app);
 };
 
+// Emite el evento 'unload-app' para descargar una aplicación.
 const unloadApp = (app: Process) => {
   emit('unload-app', app);
 };
 
+// Construye la URL para el icono de un proceso.
 const getIconUrl = (iconName: string) => {
   return new URL(`../assets/images/icons/${iconName}`, import.meta.url).href;
 };
 
+// Traduce la ubicación de un proceso a español.
 const translateLocation = (location: 'RAM' | 'Virtual' | 'Inactive') => {
   switch (location) {
     case 'RAM':
@@ -35,6 +43,7 @@ const translateLocation = (location: 'RAM' | 'Virtual' | 'Inactive') => {
 
 <template>
   <div>
+    <!-- Tabla de programas instalados -->
     <h2>Programas Instalados</h2>
     <table>
       <thead>
@@ -46,6 +55,7 @@ const translateLocation = (location: 'RAM' | 'Virtual' | 'Inactive') => {
           <th></th>
         </tr>
       </thead>
+      <!-- Grupo de transición para animar la lista de aplicaciones instaladas. -->
       <transition-group name="fade" tag="tbody">
         <tr v-for="app in installedApps" :key="app.name">
           <td>
@@ -55,12 +65,13 @@ const translateLocation = (location: 'RAM' | 'Virtual' | 'Inactive') => {
           <td>{{ app.size }}</td>
           <td>{{ translateLocation(app.location) }}</td>
           <td>
-            <button @click="loadApp(app)">Cargar</button>
+            <Button @click="loadApp(app)">Cargar</Button>
           </td>
         </tr>
       </transition-group>
     </table>
 
+    <!-- Tabla de programas cargados -->
     <h2 class="mt-4">Programas Cargados</h2>
     <table class="loaded-apps-table">
       <thead>
@@ -72,6 +83,7 @@ const translateLocation = (location: 'RAM' | 'Virtual' | 'Inactive') => {
           <th></th>
         </tr>
       </thead>
+      <!-- Grupo de transición para animar la lista de aplicaciones cargadas. -->
       <transition-group name="fade" tag="tbody">
         <tr v-for="app in loadedApps" :key="app.name">
           <td>
@@ -81,7 +93,7 @@ const translateLocation = (location: 'RAM' | 'Virtual' | 'Inactive') => {
           <td>{{ app.size }}</td>
           <td>{{ translateLocation(app.location) }}</td>
           <td>
-            <button @click="unloadApp(app)">Descargar</button>
+            <Button @click="unloadApp(app)">Descargar</Button>
           </td>
         </tr>
       </transition-group>
@@ -126,8 +138,5 @@ th, td {
 }
 th {
   @apply bg-gray-100;
-}
-button {
-  @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded;
 }
 </style>

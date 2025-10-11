@@ -1,15 +1,20 @@
 <script setup lang="ts">
+// Importa los componentes y utilidades necesarios de Vue y otros archivos.
 import ProcessTable from './components/ProcessTable.vue';
 import GraphBar from './components/GraphBar.vue';
+import Button from './components/Button.vue';
 import { ref, computed } from 'vue';
 import type { Process } from './types';
 
+// Define variables reactivas para el nombre y tamaño de la nueva aplicación.
 const newAppName = ref('');
 const newAppSize = ref<number | null>(null);
 
-const ramSize = 8000; // 8GB in MB
-const virtualRamSize = 4000; // 4GB in MB
+// Define el tamaño de la RAM y la RAM virtual en MB.
+const ramSize = 8000; // 8GB en MB
+const virtualRamSize = 4000; // 4GB en MB
 
+// Define una lista reactiva de aplicaciones instaladas con datos de ejemplo.
 const installedApps = ref<Process[]>([
   { name: 'Microsoft Word', size: 1200, location: 'Inactive', icon: 'ms-word.svg' },
   { name: 'VSCode', size: 1800, location: 'Inactive', icon: 'visual-studio-code.svg' },
@@ -20,55 +25,65 @@ const installedApps = ref<Process[]>([
   { name: 'VMWare Workstation', size: 2700, location: 'Inactive', icon: 'vmware-workstation.svg' },
 ]);
 
+// Define una lista reactiva para las aplicaciones cargadas en memoria.
 const loadedApps = ref<Process[]>([]);
 
+// Calcula el uso actual de la RAM sumando el tamaño de las aplicaciones en la RAM.
 const ramUsage = computed(() => {
   return loadedApps.value
     .filter(p => p.location === 'RAM')
     .reduce((total, process) => total + process.size, 0);
 });
 
+// Calcula el uso actual de la RAM virtual sumando el tamaño de las aplicaciones en la memoria virtual.
 const virtualRamUsage = computed(() => {
   return loadedApps.value
     .filter(p => p.location === 'Virtual')
     .reduce((total, process) => total + process.size, 0);
 });
 
+// Obtiene una lista de los procesos que se encuentran actualmente en la RAM.
 const ramProcesses = computed(() => {
   return loadedApps.value.filter(p => p.location === 'RAM');
 });
 
+// Obtiene una lista de los procesos que se encuentran actualmente en la memoria virtual.
 const virtualRamProcesses = computed(() => {
   return loadedApps.value.filter(p => p.location === 'Virtual');
 });
 
+// Calcula el estado de la RAM en formato "GB usados / GB totales".
 const ramStatus = computed(() => {
   const usageGB = (ramUsage.value / 1000).toFixed(1);
   const totalGB = (ramSize / 1000).toFixed(1);
   return `${usageGB} GB / ${totalGB} GB`;
 });
 
+// Calcula el estado de la memoria virtual en formato "GB usados / GB totales".
 const virtualRamStatus = computed(() => {
   const usageGB = (virtualRamUsage.value / 1000).toFixed(1);
   const totalGB = (virtualRamSize / 1000).toFixed(1);
   return `${usageGB} GB / ${totalGB} GB`;
 });
 
+// Función para añadir una nueva aplicación a la lista de aplicaciones instaladas.
 const addNewApp = () => {
   if (newAppName.value && newAppSize.value && newAppSize.value > 0) {
-    // Check if app with same name already exists
+    // Comprueba si ya existe una aplicación con el mismo nombre.
     const existingApp = installedApps.value.find(app => app.name.toLowerCase() === newAppName.value.toLowerCase()) || loadedApps.value.find(app => app.name.toLowerCase() === newAppName.value.toLowerCase());
     if (existingApp) {
       alert('Ya existe un programa con este nombre.');
       return;
     }
 
+    // Crea el nuevo objeto de proceso para la aplicación.
     const newApp: Process = {
       name: newAppName.value,
       size: newAppSize.value,
       location: 'Inactive',
       icon: 'generic-program.svg',
     };
+    // Añade la nueva aplicación a la lista de instaladas y resetea los campos del formulario.
     installedApps.value.push(newApp);
     newAppName.value = '';
     newAppSize.value = null;
@@ -77,8 +92,9 @@ const addNewApp = () => {
   }
 };
 
+// Función para cargar una aplicación en la memoria.
 const loadApp = (app: Process) => {
-  // Attempt to load directly into RAM if there's space
+  // Intenta cargar la aplicación directamente en la RAM si hay espacio.
   if (ramUsage.value + app.size <= ramSize) {
     app.location = 'RAM';
     installedApps.value = installedApps.value.filter(p => p.name !== app.name);
@@ -86,30 +102,30 @@ const loadApp = (app: Process) => {
     return;
   }
 
-  // Not enough RAM, try to page out processes from RAM to virtual memory
+  // Si no hay suficiente RAM, intenta paginar procesos de la RAM a la memoria virtual.
   const ramProcesses = loadedApps.value.filter(p => p.location === 'RAM');
-  const processesToTryPaging = [...ramProcesses]; // FIFO order is preserved from loadedApps
+  const processesToTryPaging = [...ramProcesses]; // El orden FIFO se preserva de loadedApps.
   const processesSuccessfullyPaged: Process[] = [];
 
   for (const processToPage of processesToTryPaging) {
-    // Check if there's enough virtual memory for this process
+    // Comprueba si hay suficiente memoria virtual para este proceso.
     if (virtualRamUsage.value + processToPage.size <= virtualRamSize) {
-      // Move it to virtual memory
+      // Mueve el proceso a la memoria virtual.
       processToPage.location = 'Virtual';
       processesSuccessfullyPaged.push(processToPage);
 
-      // Check if there is enough space for the new app now
+      // Comprueba si ahora hay suficiente espacio para la nueva aplicación.
       if (ramUsage.value + app.size <= ramSize) {
-        // Yes, there is space. Load the app.
+        // Sí, hay espacio. Carga la aplicación.
         app.location = 'RAM';
         installedApps.value = installedApps.value.filter(p => p.name !== app.name);
         loadedApps.value.push(app);
-        return; // Done
+        return; // Terminado.
       }
     } else {
-      // Not enough virtual memory to continue paging.
-      // We might have paged some processes already, but still not enough space.
-      // Revert the paged processes.
+      // No hay suficiente memoria virtual para continuar paginando.
+      // Es posible que ya se hayan paginado algunos procesos, pero aún no hay espacio suficiente.
+      // Revierte los procesos paginados.
       for (const p of processesSuccessfullyPaged) {
         p.location = 'RAM';
       }
@@ -118,15 +134,16 @@ const loadApp = (app: Process) => {
     }
   }
 
-  // If we are here, we have tried paging out all processes in RAM that could fit in virtual memory,
-  // but it was still not enough to fit the new app.
-  // Revert any changes.
+  // Si llegamos aquí, hemos intentado paginar todos los procesos en la RAM que cabían en la memoria virtual,
+  // pero aún no fue suficiente para la nueva aplicación.
+  // Revierte cualquier cambio.
   for (const p of processesSuccessfullyPaged) {
     p.location = 'RAM';
   }
   alert('No hay suficiente RAM para cargar el programa. Se intentó mover todos los programas posibles a la memoria virtual.');
 };
 
+// Función para descargar una aplicación de la memoria.
 const unloadApp = (app: Process) => {
   app.location = 'Inactive';
   loadedApps.value = loadedApps.value.filter(p => p.name !== app.name);
@@ -136,14 +153,14 @@ const unloadApp = (app: Process) => {
 
 <template>
   <main>
-    <h1>Simulador de <span>Ram</span></h1>
+    <h1 class="font-anton">Simulador de <span>Ram</span></h1>
 
     <div class="add-app-form my-4 p-4 border rounded-lg shadow-md">
       <h2 class="text-xl font-bold mb-4 text-center">Añadir Nuevo Programa</h2>
       <form @submit.prevent="addNewApp" class="flex items-center justify-center gap-4">
         <input type="text" v-model="newAppName" placeholder="Nombre del Programa" class="p-2 border rounded w-1/3" required>
         <input type="number" v-model.number="newAppSize" placeholder="Tamaño (MB)" class="p-2 border rounded w-1/4" required min="1">
-        <button type="submit" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">Añadir Programa</button>
+        <Button type="submit">Añadir</Button>
       </form>
     </div>
     
@@ -180,7 +197,7 @@ const unloadApp = (app: Process) => {
     @apply p-6;
   }
     h1 {
-    @apply text-center text-4xl font-bold;
+    @apply text-center text-5xl font-bold;
     animation: pulse 2s infinite;
 
     span {
