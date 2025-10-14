@@ -49,17 +49,19 @@ const newProgramName = ref('');
 const newProgramSize = ref<number | null>(null);
 const newProgramPriority = ref<1 | 2 | 3 | 4 | 5>(3);
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 const installedPrograms = ref<Process[]>([
-  { name: 'Google Chrome', size: 1024, location: 'Inactive', icon: '/assets/img/icons/google-chrome.svg', priority: 2 },
-  { name: 'Visual Studio Code', size: 1768, location: 'Inactive', icon: '/assets/img/icons/visual-studio-code.svg', priority: 2 },
-  { name: 'Docker', size: 2048, location: 'Inactive', icon: '/assets/img/icons/docker.svg', priority: 3 },
-  { name: 'Spotify', size: 1512, location: 'Inactive', icon: '/assets/img/icons/spotify-client.svg', priority: 4 },
-  { name: 'Microsoft Edge', size: 1950, location: 'Inactive', icon: '/assets/img/icons/edge.svg', priority: 3 },
-  { name: 'Claude AI', size: 1050, location: 'Inactive', icon: '/assets/img/icons/claude-ai-icon.svg', priority: 2 },
-  { name: 'Notion', size: 1600, location: 'Inactive', icon: '/assets/img/icons/notion.svg', priority: 3 },
-  { name: 'WhatsApp', size: 1800, location: 'Inactive', icon: '/assets/img/icons/whatsapp.svg', priority: 4 },
-  { name: 'IntelliJ IDEA', size: 3500, location: 'Inactive', icon: '/assets/img/icons/intellijidea.svg', priority: 1 },
-  { name: 'Figma', size: 850, location: 'Inactive', icon: '/assets/img/icons/figma.svg', priority: 3 },
+  { name: 'Google Chrome', size: 1024, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/google-chrome.svg`, priority: 2 },
+  { name: 'Visual Studio Code', size: 1768, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/visual-studio-code.svg`, priority: 2 },
+  { name: 'Docker', size: 2048, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/docker.svg`, priority: 3 },
+  { name: 'Spotify', size: 1512, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/spotify-client.svg`, priority: 4 },
+  { name: 'Microsoft Edge', size: 1950, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/edge.svg`, priority: 3 },
+  { name: 'Claude AI', size: 1050, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/claude-ai-icon.svg`, priority: 2 },
+  { name: 'Notion', size: 1600, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/notion.svg`, priority: 3 },
+  { name: 'WhatsApp', size: 1800, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/whatsapp.svg`, priority: 4 },
+  { name: 'IntelliJ IDEA', size: 3500, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/intellijidea.svg`, priority: 1 },
+  { name: 'Figma', size: 850, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/figma.svg`, priority: 3 },
 ]);
 
 const ramPrograms = ref<Process[]>([]);
@@ -191,7 +193,7 @@ const installProgram = () => {
     name: newProgramName.value,
     size: newProgramSize.value,
     location: 'Inactive',
-    icon: '/assets/img/icons/generic-program.svg',
+    icon: `${BASE_URL}assets/img/icons/generic-program.svg`,
     priority: newProgramPriority.value
   };
 
