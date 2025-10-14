@@ -8,9 +8,7 @@ Un simulador interactivo de gestión de memoria RAM y memoria virtual construido
 ![Vista Desktop](./preview-desktop.jpeg)
 
 ### Mobile
-<p>
-   <img src="preview-mobile.png" alt="Mobile Preview" style="max-width: 250px" />
-</p>
+<img src="preview-mobile.png" alt="Mobile Preview" width="250" />
 
 ## Características
 
@@ -34,8 +32,7 @@ Un simulador interactivo de gestión de memoria RAM y memoria virtual construido
 
 ## Requisitos Previos
 
-- Node.js (versión 18 o superior)
-- npm o yarn
+- Bun (versión 1.0 o superior)
 
 ## Instalación
 
@@ -47,21 +44,21 @@ cd ram-simulator
 
 2. Instala las dependencias:
 ```bash
-npm install
+bun install
 ```
 
 3. Inicia el servidor de desarrollo:
 ```bash
-npm run dev
+bun run dev
 ```
 
 4. Abre tu navegador en `http://localhost:5173`
 
 ## Scripts Disponibles
 
-- `npm run dev` - Inicia el servidor de desarrollo
-- `npm run build` - Construye la aplicación para producción
-- `npm run preview` - Previsualiza la build de producción localmente
+- `bun run dev` - Inicia el servidor de desarrollo
+- `bun run build` - Construye la aplicación para producción
+- `bun run preview` - Previsualiza la build de producción localmente
 
 ## Cómo Usar
 
