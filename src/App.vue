@@ -12,6 +12,7 @@ import PageReveal from './components/PageReveal.vue';
 
 const h1 = ref<HTMLElement | null>(null);
 const logo = ref<HTMLElement | null>(null);
+const githubLink = ref<HTMLElement | null>(null);
 const mainContent = ref<HTMLElement | null>(null);
 const formSection = ref<HTMLElement | null>(null);
 const graphsSection = ref<HTMLElement | null>(null);
@@ -210,7 +211,7 @@ onMounted(() => {
   gsap.registerPlugin(TextPlugin);
 
   // Ocultar contenido inicialmente
-  gsap.set([logo.value, h1.value], {
+  gsap.set([logo.value, h1.value, githubLink.value], {
     opacity: 0
   });
 
@@ -248,6 +249,14 @@ onMounted(() => {
       opacity: 1,
       ease: "none",
       delay: .5
+    });
+
+    gsap.to(githubLink.value, {
+      duration: 0.8,
+      opacity: 1,
+      x: 0,
+      ease: "power3.out",
+      delay: 1.2
     });
 
     // Animar elementos del main
@@ -302,7 +311,7 @@ onMounted(() => {
     <div class="header-content">
       <img class="header__logo" src="/assets/img/oval.svg" alt="Logo" ref="logo">
       <h1 class="h1" ref="h1"></h1>
-      <a href="https://github.com/juliannGabrielDev/ram-simulator" target="_blank" rel="noopener noreferrer" class="ml-auto">
+      <a href="https://github.com/juliannGabrielDev/ram-simulator" target="_blank" rel="noopener noreferrer" class="ml-auto" ref="githubLink">
         <img src="./assets/img/icons/github_light.svg" alt="GitHub" class="w-5 h-5 sm:w-6 sm:h-6" />
       </a>
     </div>
