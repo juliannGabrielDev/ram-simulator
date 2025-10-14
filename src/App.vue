@@ -50,16 +50,16 @@ const newProgramSize = ref<number | null>(null);
 const newProgramPriority = ref<1 | 2 | 3 | 4 | 5>(3);
 
 const installedPrograms = ref<Process[]>([
-  { name: 'Google Chrome', size: 1024, location: 'Inactive', icon: './assets/img/icons/google-chrome.svg', priority: 2 },
-  { name: 'Visual Studio Code', size: 1768, location: 'Inactive', icon: './assets/img/icons/visual-studio-code.svg', priority: 2 },
-  { name: 'Docker', size: 2048, location: 'Inactive', icon: './assets/img/icons/docker.svg', priority: 3 },
-  { name: 'Spotify', size: 1512, location: 'Inactive', icon: './assets/img/icons/spotify-client.svg', priority: 4 },
-  { name: 'Microsoft Edge', size: 1950, location: 'Inactive', icon: './assets/img/icons/edge.svg', priority: 3 },
-  { name: 'Claude AI', size: 1050, location: 'Inactive', icon: './assets/img/icons/claude-ai-icon.svg', priority: 2 },
-  { name: 'Notion', size: 1600, location: 'Inactive', icon: './assets/img/icons/notion.svg', priority: 3 },
-  { name: 'WhatsApp', size: 1800, location: 'Inactive', icon: './assets/img/icons/whatsapp.svg', priority: 4 },
-  { name: 'IntelliJ IDEA', size: 3500, location: 'Inactive', icon: './assets/img/icons/intellijidea.svg', priority: 1 },
-  { name: 'Figma', size: 850, location: 'Inactive', icon: './assets/img/icons/figma.svg', priority: 3 },
+  { name: 'Google Chrome', size: 1024, location: 'Inactive', icon: '/assets/img/icons/google-chrome.svg', priority: 2 },
+  { name: 'Visual Studio Code', size: 1768, location: 'Inactive', icon: '/assets/img/icons/visual-studio-code.svg', priority: 2 },
+  { name: 'Docker', size: 2048, location: 'Inactive', icon: '/assets/img/icons/docker.svg', priority: 3 },
+  { name: 'Spotify', size: 1512, location: 'Inactive', icon: '/assets/img/icons/spotify-client.svg', priority: 4 },
+  { name: 'Microsoft Edge', size: 1950, location: 'Inactive', icon: '/assets/img/icons/edge.svg', priority: 3 },
+  { name: 'Claude AI', size: 1050, location: 'Inactive', icon: '/assets/img/icons/claude-ai-icon.svg', priority: 2 },
+  { name: 'Notion', size: 1600, location: 'Inactive', icon: '/assets/img/icons/notion.svg', priority: 3 },
+  { name: 'WhatsApp', size: 1800, location: 'Inactive', icon: '/assets/img/icons/whatsapp.svg', priority: 4 },
+  { name: 'IntelliJ IDEA', size: 3500, location: 'Inactive', icon: '/assets/img/icons/intellijidea.svg', priority: 1 },
+  { name: 'Figma', size: 850, location: 'Inactive', icon: '/assets/img/icons/figma.svg', priority: 3 },
 ]);
 
 const ramPrograms = ref<Process[]>([]);
@@ -69,18 +69,6 @@ const runningPrograms = computed(() => [...ramPrograms.value, ...virtualPrograms
 
 const usedRam = computed(() => ramPrograms.value.reduce((total, p) => total + p.size, 0));
 const usedVirtualMemory = computed(() => virtualPrograms.value.reduce((total, p) => total + p.size, 0));
-
-const getIconUrl = (path: string) => {
-  return new URL(path, import.meta.url).href;
-};
-
-const installedProgramsWithUrls = computed(() =>
-  installedPrograms.value.map(p => ({ ...p, icon: getIconUrl(p.icon!) }))
-);
-
-const runningProgramsWithUrls = computed(() =>
-  runningPrograms.value.map(p => ({ ...p, icon: getIconUrl(p.icon!) }))
-);
 
 const moveToVirtual = (program: Process) => {
   program.location = 'Virtual';
@@ -203,7 +191,7 @@ const installProgram = () => {
     name: newProgramName.value,
     size: newProgramSize.value,
     location: 'Inactive',
-    icon: './assets/img/icons/generic-program.svg',
+    icon: '/assets/img/icons/generic-program.svg',
     priority: newProgramPriority.value
   };
 
@@ -310,7 +298,7 @@ onMounted(() => {
 <template>
   <header class="header">
     <div class="header-content">
-      <img class="header__logo" src="./assets/img/oval.svg" alt="Logo" ref="logo">
+      <img class="header__logo" src="/assets/img/oval.svg" alt="Logo" ref="logo">
       <h1 class="h1" ref="h1"></h1>
     </div>
   </header>
@@ -341,9 +329,9 @@ onMounted(() => {
       <MemoryGraph title="Virtual" :programs="virtualPrograms" :total-memory="TOTAL_VIRTUAL_MB"
         :used-memory="usedVirtualMemory" color="bg-purple-300" @close-program="removeProgram" />
     </div>
-    <InstalledProgramsTable ref="installedTable" :programs="installedProgramsWithUrls" @add-program="addProgramToRam"
+    <InstalledProgramsTable ref="installedTable" :programs="installedPrograms" @add-program="addProgramToRam"
       class="col-span-1 md:col-span-2" />
-    <RunningProgramsTable ref="runningTable" :programs="runningProgramsWithUrls" @remove-program="removeProgram"
+    <RunningProgramsTable ref="runningTable" :programs="runningPrograms" @remove-program="removeProgram"
       class="col-span-1 md:col-span-2" />
   </main>
   <footer class="footer">
@@ -399,7 +387,7 @@ onMounted(() => {
 
   .form-section {
     @apply bg-cover bg-no-repeat bg-center rounded-2xl p-4 relative;
-    background-image: url('./assets/img/bg.png');
+    background-image: url('/assets/img/bg.png');
 
     @media (min-width: 1024px) {
       @apply col-span-1;
