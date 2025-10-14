@@ -302,6 +302,9 @@ onMounted(() => {
     <div class="header-content">
       <img class="header__logo" src="/assets/img/oval.svg" alt="Logo" ref="logo">
       <h1 class="h1" ref="h1"></h1>
+      <a href="https://github.com/juliannGabrielDev/ram-simulator" target="_blank" rel="noopener noreferrer" class="ml-auto">
+        <img src="./assets/img/icons/github_light.svg" alt="GitHub" class="w-5 h-5 sm:w-6 sm:h-6" />
+      </a>
     </div>
   </header>
   <main class="main grid-rows-[auto_auto]" ref="mainContent">
