@@ -38,11 +38,11 @@ defineExpose({
     <table class="col-span-2" ref="tableRoot">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Size (MB)</th>
-          <th>Priority</th>
-          <th>Location</th>
-          <th>Action</th>
+          <th>Nombre</th>
+          <th>Tamaño (MB)</th>
+          <th>Prioridad</th>
+          <th>Ubicación</th>
+          <th>Acción</th>
         </tr>
       </thead>
       <tbody ref="tbody">

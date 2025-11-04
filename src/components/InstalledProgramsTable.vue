@@ -38,10 +38,10 @@ defineExpose({
     <table class="col-span-2" ref="tableRoot">
       <thead>
         <tr>
-          <th>Program</th>
-          <th>Size (MB)</th>
-          <th>Priority</th>
-          <th>Action</th>
+          <th>Programa</th>
+          <th>Tamaño (MB)</th>
+          <th>Prioridad</th>
+          <th>Acción</th>
         </tr>
       </thead>
       <tbody ref="tbody">
@@ -59,7 +59,7 @@ defineExpose({
             </span>
           </td>
           <td>
-            <BaseButton variant="secondary" @click="onAddClick(program)">Add</BaseButton>
+            <BaseButton variant="secondary" @click="onAddClick(program)">Agregar</BaseButton>
           </td>
         </tr>
       </tbody>

@@ -53,11 +53,11 @@ const newProgramPriority = ref<1 | 2 | 3 | 4 | 5>(3);
 const BASE_URL = import.meta.env.BASE_URL;
 
 const installedPrograms = ref<Process[]>([
-  { name: 'Google Chrome', size: 1024, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/google-chrome.svg`, priority: 2 },
-  { name: 'Visual Studio Code', size: 1768, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/visual-studio-code.svg`, priority: 2 },
+  { name: 'Chrome', size: 1024, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/google-chrome.svg`, priority: 2 },
+  { name: 'VSCode', size: 1768, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/visual-studio-code.svg`, priority: 2 },
   { name: 'Docker', size: 2048, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/docker.svg`, priority: 3 },
   { name: 'Spotify', size: 1512, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/spotify-client.svg`, priority: 4 },
-  { name: 'Microsoft Edge', size: 1950, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/edge.svg`, priority: 3 },
+  { name: 'Edge', size: 1950, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/edge.svg`, priority: 3 },
   { name: 'Claude AI', size: 1050, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/claude-ai-icon.svg`, priority: 2 },
   { name: 'Notion', size: 1600, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/notion.svg`, priority: 3 },
   { name: 'WhatsApp', size: 1800, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/whatsapp.svg`, priority: 4 },
@@ -92,7 +92,7 @@ const closeProgram = (program: Process) => {
 
 const addProgramToRam = (programToAdd: Process) => {
   if (runningPrograms.value.some(p => p.name === programToAdd.name)) {
-    displayPopup(`${programToAdd.name} is already running.`, 'warning');
+    displayPopup(`${programToAdd.name} ya se está ejecutando.`, 'warning');
     return;
   }
 
@@ -131,7 +131,7 @@ const addProgramToRam = (programToAdd: Process) => {
       programToAdd.location = 'RAM';
       ramPrograms.value.push(programToAdd);
       installedPrograms.value = installedPrograms.value.filter(p => p.name !== programToAdd.name);
-      displayPopup(`Moved ${programsToMove.map(p => p.name).join(', ')} to Virtual Memory to make space.`, 'info');
+      displayPopup(`Se movió ${programsToMove.map(p => p.name).join(', ')} a Memoria Virtual para liberar espacio.`, 'info');
       return;
     }
   }
@@ -161,11 +161,11 @@ const addProgramToRam = (programToAdd: Process) => {
     programToAdd.location = 'RAM';
     ramPrograms.value.push(programToAdd);
     installedPrograms.value = installedPrograms.value.filter(p => p.name !== programToAdd.name);
-    displayPopup(`Closed ${programsToClose.map(p => p.name).join(', ')} due to insufficient memory.`, 'warning');
+    displayPopup(`Se cerró ${programsToClose.map(p => p.name).join(', ')} por memoria insuficiente.`, 'warning');
     return;
   }
 
-  displayPopup(`Cannot run ${programToAdd.name}. Not enough memory even after closing lower priority programs.`, 'error');
+  displayPopup(`No se puede ejecutar ${programToAdd.name}. No hay suficiente memoria incluso después de cerrar programas de menor prioridad.`, 'error');
 };
 
 const removeProgram = (programToRemove: Process) => {
@@ -182,11 +182,11 @@ const removeProgram = (programToRemove: Process) => {
 
 const installProgram = () => {
   if (!newProgramName.value || !newProgramSize.value) {
-    displayPopup('Please provide a name and size for the program.', 'warning');
+    displayPopup('Por favor, proporciona un nombre y tamaño para el programa.', 'warning');
     return;
   }
   if (installedPrograms.value.some(p => p.name === newProgramName.value) || runningPrograms.value.some(p => p.name === newProgramName.value)) {
-    displayPopup('A program with this name already exists.', 'warning');
+    displayPopup('Ya existe un programa con este nombre.', 'warning');
     return;
   }
 
@@ -245,7 +245,7 @@ onMounted(() => {
 
     gsap.to(h1.value, {
       duration: 2,
-      text: "RAM Simulator",
+      text: "Simulador de RAM",
       opacity: 1,
       ease: "none",
       delay: .5
@@ -318,26 +318,26 @@ onMounted(() => {
   </header>
   <main class="main grid-rows-[auto_auto]" ref="mainContent">
     <div class="form-section" ref="formSection">
-      <h2 class="form-section__title">Add a program</h2>
+      <h2 class="form-section__title">Agregar un programa</h2>
       <form class="form" @submit.prevent="installProgram">
-        <label class="label" for="input-name">Name:</label>
-        <input class="input" id="input-name" type="text" placeholder="e.g., Chrome" v-model="newProgramName">
-        <label class="label" for="input-size">Size (MB):</label>
-        <input class="input form__size" id="input-size" type="number" placeholder="e.g., 1024"
+        <label class="label" for="input-name">Nombre:</label>
+        <input class="input" id="input-name" type="text" placeholder="ej., Chrome" v-model="newProgramName">
+        <label class="label" for="input-size">Tamaño (MB):</label>
+        <input class="input form__size" id="input-size" type="number" placeholder="ej., 1024"
           v-model.number="newProgramSize">
-        <label class="label" for="input-priority">Priority (1-5):</label>
+        <label class="label" for="input-priority">Prioridad (1-5):</label>
         <select class="input form__priority" id="input-priority" v-model.number="newProgramPriority">
-          <option :value="1">1 - Highest</option>
-          <option :value="2">2 - High</option>
-          <option :value="3">3 - Medium</option>
-          <option :value="4">4 - Low</option>
-          <option :value="5">5 - Lowest</option>
+          <option :value="1">1 - Más alta</option>
+          <option :value="2">2 - Alta</option>
+          <option :value="3">3 - Media</option>
+          <option :value="4">4 - Baja</option>
+          <option :value="5">5 - Más baja</option>
         </select>
-        <BaseButton type="submit" class="w-fit mx-auto mt-4">Add</BaseButton>
+        <BaseButton type="submit" class="w-fit mx-auto mt-4">Agregar</BaseButton>
       </form>
     </div>
     <div class="graphs bg-neutral-900 col-span-1 md:col-span-2 lg:col-span-3 rounded-2xl text-white px-4 sm:px-8 py-4 pt-20" ref="graphsSection">
-      <h3 class="text-xl sm:text-2xl font-bitcount mb-4">Graphs</h3>
+      <h3 class="text-xl sm:text-2xl font-bitcount mb-4">Gráficos</h3>
       <MemoryGraph title="RAM" :programs="ramPrograms" :total-memory="TOTAL_RAM_MB" :used-memory="usedRam"
         color="bg-blue-300" @close-program="removeProgram" />
       <MemoryGraph title="Virtual" :programs="virtualPrograms" :total-memory="TOTAL_VIRTUAL_MB"
