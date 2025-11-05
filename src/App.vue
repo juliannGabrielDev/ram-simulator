@@ -1,4 +1,12 @@
 <script setup lang="ts">
+/*
+  Archivo principal de la aplicación (App.vue).
+  - Gestiona el estado global de los programas (instalados, en RAM, en Virtual).
+  - Contiene la lógica para instalar, ejecutar, mover y cerrar programas.
+  - Controla las animaciones iniciales con GSAP.
+  Comentarios en español añadidos para facilitar la lectura del código.
+*/
+
 import { computed, onMounted, ref } from 'vue';
 import { gsap } from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
@@ -10,6 +18,7 @@ import MemoryGraph from './components/MemoryGraph.vue';
 import Popup from './components/Popup.vue';
 import PageReveal from './components/PageReveal.vue';
 
+// Refs a elementos del DOM (utilizados por GSAP para animaciones)
 const h1 = ref<HTMLElement | null>(null);
 const logo = ref<HTMLElement | null>(null);
 const githubLink = ref<HTMLElement | null>(null);
@@ -20,15 +29,19 @@ const installedTable = ref<any>(null);
 const runningTable = ref<any>(null);
 const contentVisible = ref(false);
 
-const TOTAL_RAM_MB = 8 * 1024; // 16GB
-const TOTAL_VIRTUAL_MB = 4 * 1024; // 8GB
+// Constantes que representan la memoria disponible (en MB)
+// Nota: los comentarios junto a los cálculos parecen inconsistentes con el valor (8*1024 = 8192 MB = 8GB)
+const TOTAL_RAM_MB = 8 * 1024;
+const TOTAL_VIRTUAL_MB = 4 * 1024;
 
+// Estado para el popup y la pantalla de revelación inicial
 const popupMessage = ref('');
 const popupType = ref<'info' | 'warning' | 'error' | 'success'>('info');
 const showPopup = ref(false);
 const showReveal = ref(true);
 const revealComplete = ref(false);
 
+// Muestra un popup con mensaje y tipo (info/warning/error/success)
 const displayPopup = (message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info') => {
   popupMessage.value = message;
   popupType.value = type;
@@ -39,19 +52,23 @@ const closePopup = () => {
   showPopup.value = false;
 };
 
+// Llamado cuando termina la animación de revelado inicial
 const onRevealComplete = () => {
   revealComplete.value = true;
+  // Cerrar la vista de revelación tras un pequeño retraso
   setTimeout(() => {
     showReveal.value = false;
   }, 400);
 };
 
+// Estado del formulario para instalar un nuevo programa
 const newProgramName = ref('');
 const newProgramSize = ref<number | null>(null);
 const newProgramPriority = ref<1 | 2 | 3 | 4 | 5>(3);
 
 const BASE_URL = import.meta.env.BASE_URL;
 
+// Lista simulada de programas instalados por defecto
 const installedPrograms = ref<Process[]>([
   { name: 'Chrome', size: 1024, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/google-chrome.svg`, priority: 2 },
   { name: 'VSCode', size: 1768, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/visual-studio-code.svg`, priority: 2 },
@@ -65,20 +82,24 @@ const installedPrograms = ref<Process[]>([
   { name: 'Figma', size: 850, location: 'Inactive', icon: `${BASE_URL}assets/img/icons/figma.svg`, priority: 3 },
 ]);
 
+// Listas que representan los programas actualmente en RAM y en memoria virtual
 const ramPrograms = ref<Process[]>([]);
 const virtualPrograms = ref<Process[]>([]);
 
+// Propiedades computadas que derivan estado útil para la UI
 const runningPrograms = computed(() => [...ramPrograms.value, ...virtualPrograms.value]);
 
 const usedRam = computed(() => ramPrograms.value.reduce((total, p) => total + p.size, 0));
 const usedVirtualMemory = computed(() => virtualPrograms.value.reduce((total, p) => total + p.size, 0));
 
+// Mueve un programa desde RAM a memoria Virtual (se asume que ya existe espacio en Virtual)
 const moveToVirtual = (program: Process) => {
   program.location = 'Virtual';
   ramPrograms.value = ramPrograms.value.filter(p => p.name !== program.name);
   virtualPrograms.value.push(program);
 };
 
+// Cierra un programa (lo saca de RAM/Virtual y lo devuelve a la lista de instalados)
 const closeProgram = (program: Process) => {
   if (program.location === 'RAM') {
     ramPrograms.value = ramPrograms.value.filter(p => p.name !== program.name);
@@ -90,6 +111,8 @@ const closeProgram = (program: Process) => {
   installedPrograms.value.sort((a, b) => a.name.localeCompare(b.name));
 };
 
+// Intento de ejecutar un programa: se trata de colocarlo en RAM primero, luego Virtual,
+// y si no hay espacio suficiente, se intentan cerrar o mover programas de menor prioridad.
 const addProgramToRam = (programToAdd: Process) => {
   if (runningPrograms.value.some(p => p.name === programToAdd.name)) {
     displayPopup(`${programToAdd.name} ya se está ejecutando.`, 'warning');
@@ -146,28 +169,46 @@ const addProgramToRam = (programToAdd: Process) => {
 
   // Virtual también está llena, intentar cerrar programas de menor prioridad
   const programsToClose: Process[] = [];
-  let totalSpaceFreed = 0;
+  const candidates = [...virtualPrograms.value, ...ramPrograms.value]
+    .filter(p => p.priority > programToAdd.priority)
+    .sort((a, b) => b.priority - a.priority);
 
-  for (const program of [...virtualPrograms.value, ...ramPrograms.value].sort((a, b) => b.priority - a.priority)) {
-    if (program.priority > programToAdd.priority) {
-      programsToClose.push(program);
-      totalSpaceFreed += program.size;
-      if (totalSpaceFreed >= spaceNeeded) break;
+  let potentialRamFreed = 0;
+  let potentialVirtualFreed = 0;
+
+  for (const program of candidates) {
+    programsToClose.push(program);
+    if (program.location === 'RAM') {
+      potentialRamFreed += program.size;
+    } else {
+      potentialVirtualFreed += program.size;
     }
-  }
 
-  if (totalSpaceFreed >= spaceNeeded) {
-    programsToClose.forEach(closeProgram);
-    programToAdd.location = 'RAM';
-    ramPrograms.value.push(programToAdd);
-    installedPrograms.value = installedPrograms.value.filter(p => p.name !== programToAdd.name);
-    displayPopup(`Se cerró ${programsToClose.map(p => p.name).join(', ')} por memoria insuficiente.`, 'warning');
-    return;
+    // Comprobar si cabe en RAM
+    if (usedRam.value - potentialRamFreed + spaceNeeded <= TOTAL_RAM_MB) {
+      programsToClose.forEach(closeProgram);
+      programToAdd.location = 'RAM';
+      ramPrograms.value.push(programToAdd);
+      installedPrograms.value = installedPrograms.value.filter(p => p.name !== programToAdd.name);
+      displayPopup(`Se cerró ${programsToClose.map(p => p.name).join(', ')} por memoria insuficiente.`, 'warning');
+      return;
+    }
+
+    // Comprobar si cabe en Virtual
+    if (usedVirtualMemory.value - potentialVirtualFreed + spaceNeeded <= TOTAL_VIRTUAL_MB) {
+      programsToClose.forEach(closeProgram);
+      programToAdd.location = 'Virtual';
+      virtualPrograms.value.push(programToAdd);
+      installedPrograms.value = installedPrograms.value.filter(p => p.name !== programToAdd.name);
+      displayPopup(`Se cerró ${programsToClose.map(p => p.name).join(', ')} por memoria insuficiente.`, 'warning');
+      return;
+    }
   }
 
   displayPopup(`No se puede ejecutar ${programToAdd.name}. No hay suficiente memoria incluso después de cerrar programas de menor prioridad.`, 'error');
 };
 
+// Elimina un programa de la ejecución (lo devuelve a 'Inactive' y a la lista de instalados)
 const removeProgram = (programToRemove: Process) => {
   if (programToRemove.location === 'RAM') {
     ramPrograms.value = ramPrograms.value.filter(p => p.name !== programToRemove.name);
@@ -180,6 +221,7 @@ const removeProgram = (programToRemove: Process) => {
   installedPrograms.value.sort((a, b) => a.name.localeCompare(b.name));
 };
 
+// Instala (añade) un nuevo programa a la lista de instalados desde el formulario
 const installProgram = () => {
   if (!newProgramName.value || !newProgramSize.value) {
     displayPopup('Por favor, proporciona un nombre y tamaño para el programa.', 'warning');
@@ -207,6 +249,7 @@ const installProgram = () => {
 };
 
 
+// Hook de montaje: registra plugins de GSAP y configura las animaciones iniciales
 onMounted(() => {
   gsap.registerPlugin(TextPlugin);
 
@@ -297,7 +340,7 @@ onMounted(() => {
     }
   };
 
-  // Esperar a que termine la revelación
+  // Esperar un tiempo corto y, si la pantalla de revelado ya terminó, iniciar animaciones
   setTimeout(() => {
     if (revealComplete.value) {
       startAnimations();
@@ -307,6 +350,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <!-- Plantilla principal: header, main (formulario + gráficas + tablas), footer y componentes auxiliares -->
   <header class="header">
     <div class="header-content">
       <img class="header__logo" src="/assets/img/oval.svg" alt="Logo" ref="logo">
@@ -318,6 +362,7 @@ onMounted(() => {
   </header>
   <main class="main grid-rows-[auto_auto]" ref="mainContent">
     <div class="form-section" ref="formSection">
+      <!-- Sección de formulario para añadir un nuevo programa -->
       <h2 class="form-section__title">Agregar un programa</h2>
       <form class="form" @submit.prevent="installProgram">
         <label class="label" for="input-name">Nombre:</label>
@@ -336,6 +381,7 @@ onMounted(() => {
         <BaseButton type="submit" class="w-fit mx-auto mt-4">Agregar</BaseButton>
       </form>
     </div>
+    <!-- Sección de gráficas: uso de RAM y Virtual -->
     <div class="graphs bg-neutral-900 col-span-1 md:col-span-2 lg:col-span-3 rounded-2xl text-white px-4 sm:px-8 py-4 pt-20" ref="graphsSection">
       <h3 class="text-xl sm:text-2xl font-bitcount mb-4">Gráficos</h3>
       <MemoryGraph title="RAM" :programs="ramPrograms" :total-memory="TOTAL_RAM_MB" :used-memory="usedRam"
@@ -349,6 +395,7 @@ onMounted(() => {
       class="col-span-1 md:col-span-2" />
   </main>
   <footer class="footer">
+    <!-- Pie de página con autor -->
     <p>Julián Alejandro Gabriel Isidro</p>
   </footer>
   <Popup :message="popupMessage" :type="popupType" :is-visible="showPopup" @close="closePopup" />
@@ -356,6 +403,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Estilos scoped: se usan utilidades de Tailwind vía @apply y reglas responsivas.
+  Los comentarios aquí describen bloques principales de estilo. */
 @reference 'tailwindcss';
 
 .header {
